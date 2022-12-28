@@ -1,17 +1,293 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+    <head>
+        <title>Labirinto</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta charset="utf-8"/>
+        
+<style>
+/* CSS - style.css */
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
-</head>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-<body>
-  <main>
-    <h1>Vanilla JavaScript App</h1>
-  </main>
-</body>
+html {
+    -webkit-user-select: none; 
+}
 
+body {
+    background-color: yellow;
+    margin: 0;
+}
+
+button {
+    color: white;
+    background-color: royalblue;
+    border: 5px solid yellow;
+    padding: 5px;
+    border-radius: 5px 5px;
+    font-size: 1rem;
+    text-shadow: 1px 1px black;
+    font-family: 'Press Start 2P';
+}
+button:hover {
+    cursor: pointer;
+}
+
+#inicio, #jogo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right:0;
+    text-align: center;
+    font-family: 'Press Start 2P';
+}
+
+#inicio {
+    background-color: green;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#jogo {
+    background-color: blue;
+}
+
+#voltar {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+#controle {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+}
+
+#labirinto {
+    font-family: monospace;
+    font-size: 2rem;
+}
+
+#pontos {
+    color: white;
+    text-shadow: 1px 1px black;
+}
+
+.p0,.p1,.p2,.e0,.e1,.e2 {
+    background-color: white;
+}
+.e0 {
+    color: white;
+}
+.e1 {
+    color: green;
+}
+.e2 {
+    color: blue;
+}
+.p0 {
+    color: green;
+}
+.p1 {
+    color: red;
+}
+.p2 {
+    color: pink;
+}
+
+</style>
+
+    </head>
+    <body onkeydown="keypress(event)">
+        <div id="inicio">
+            <span>
+                <h1>Labirinto</h1>
+                <button onclick="showJogo()">Jogar</button>
+                <p>josiaxgoxtoso (c)</p>
+            </span>
+        </div>
+  
+        <div id="jogo">
+            <button id="voltar" onclick="showInicio()">&#9664;</button>
+            <br>
+            PONTOS: <span id="pontos">0</span>
+            <br><br>
+            <div id="labirinto"></div>
+            <div id="controle">
+                <button onclick="moveJ(0,-1)">&#9650;</button><br>
+                <button onclick="moveJ(-1,0)">&#9664;</button>
+                <button onclick="moveJ(0,1)">&#9660;</button>
+                <button onclick="moveJ(1,0)">&#9654;</button>
+            </div>
+        </div>
+
+        <script >
+/* Javascript - script.js */
+
+//Variáveis e Constantes
+const inicio = document.querySelector("#inicio");
+const jogo = document.querySelector("#jogo");
+var labirinto = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+var elementos = [
+    "<span class='e0'>█</span>",
+    "<span class='e1'>█</span>",
+    "<span class='e2'>█</span>",
+];
+var personagens = [
+    "<span class='p0'>☻</span>",
+    "<span class='p1'>☻</span>",
+    "<span class='p2'>☻</span>",
+];
+var posicoes = [
+    [1,1],
+    [10,9],
+    [18,19],
+];
+var pontos = 0;
+
+//Exibe a tela de início
+function showInicio() {
+    //Esconde a tela do jogo
+    jogo.style.display = "none";
+    //Exibe a tela de inicio
+    inicio.style.display = "flex";
+    //Zera as posições
+    posicoes = [
+        [1,1],
+        [10,9],
+        [18,19]
+    ];
+    document.querySelector("#pontos").innerHTML = 0;
+    pontos = 0;
+}
+
+//Exibe a tela de jogo
+function showJogo() {
+    //Exibe a tela do jogo
+    jogo.style.display = "block";
+    //Esconde a tela de inicio
+    inicio.style.display = "none";
+    //Renderiza o labirinto
+    render();
+}
+
+//Renderiza o labirinto
+function render() {
+    var l = "";
+    for(var i=0; i<labirinto.length; i++){
+        for(var j=0; j<labirinto[i].length; j++){
+            var existePers = false;
+            for(var k=0; k<personagens.length; k++){
+                if(posicoes[k][0] === j && posicoes[k][1] === i){
+                    l += personagens[k];
+                    existePers = true;
+                }
+            }
+            if(!existePers) {
+                l += elementos[labirinto[i][j]];
+            }
+        }
+        l += "<br>";
+    }
+    //Desenha o labirinto
+    document.querySelector("#labirinto").innerHTML = l;
+}
+
+//Move personagem
+function move(nPers, x, y){
+    var xP = posicoes[nPers][0]+x;
+    var yP = posicoes[nPers][1]+y;
+    if(labirinto[yP][xP]===0) {
+        posicoes[nPers][0] += x;
+        posicoes[nPers][1] += y;
+    }
+    render();
+}
+
+//Move Jogador
+function moveJ(x, y) {
+    move(0, x, y);
+    //Move o oponente
+    var dir = parseInt(Math.random()*2);
+    if(dir === 0){
+        if(posicoes[0][0] > posicoes[1][0]) move(1,1,0);
+        else move(1,-1,0);
+    } else {
+        if(posicoes[0][1] > posicoes[1][1]) move(1,0,1);
+        else move(1,0,-1);
+    }
+    //Move o resgatado
+    if(dir === 0){
+        if(posicoes[1][0] > posicoes[2][0]) move(2,1,0);
+        else move(2,-1,0);
+    } else {
+        if(posicoes[1][1] > posicoes[2][1]) move(2,0,1);
+        else move(2,0,-1);
+    }
+    render();
+    //Verifica se deu game over
+    if(posicoes[0][0] === posicoes[1][0] && posicoes[0][1] === posicoes[1][1]){
+        alert("Game Over");
+        showInicio();
+    }
+    if(posicoes[2][0] === posicoes[1][0] && posicoes[2][1] === posicoes[1][1]){
+        alert("Game Over");
+        showInicio();
+    }
+    //Verifica se resgatado
+    if(posicoes[0][0] === posicoes[2][0] && posicoes[0][1] === posicoes[2][1]){
+        alert("Parabéns você resgatou");
+        //Zera as posições
+        posicoes = [
+            [1,1],
+            [10,9],
+            [18,19]
+        ];
+        pontos++;
+        document.querySelector("#pontos").innerHTML = pontos;
+        render();
+    }
+}
+
+//Evento do teclado
+function keypress(event) {
+    switch(event.code){
+        case("ArrowUp"): moveJ(0,-1); break;
+        case("ArrowDown"): moveJ(0,1); break;
+        case("ArrowLeft"): moveJ(-1,0); break;
+        case("ArrowRight"): moveJ(1,0); break;
+    }
+}
+
+//Executa ao iniciar o app
+showInicio();
+
+</script>
+    </body>
 </html>
